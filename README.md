@@ -150,34 +150,3 @@ public class NameMatchClassMethodPointcut extends NameMatchMethodPointcut {
       class="springbook.user.service.UserServiceTest$TestUserServiceImpl" 
       parent="userService" />
 ```
-여기서 특이한 사항이 두 가지 눈에 띄는데, 하나는 클래스 이름에 사용한 $ 기호인데, 이는 스태틱 멤버 클래스를 지정할 때 사용하는 것이다. TestUserServiceImpl 클래스는 UserServiceTest의 스태틱 멤버 클래스이므로 $를 사용해서 클래스 이름을 지정해주면 된다.
-
-또 한가지 특이한 점은 parent 애트리뷰트다. <bean> 태그에 parent 애트리뷰트를 사용하면 다른 빈 설정의 내용을 상속 받을 수 있다. 현재 parent='userService"라고 하면 userService의 빈 설정을 그대로 가져와서 사용하겠다는 뜻이다.
-
-그리고 이제 이렇게 추가한 testUserService 빈을 이용해서 테스트를 진행하면 테스트가 성공하는 것을 확인할 수 있다.
-```
-public class UserServiceTest {
-
-	@Autowired UserService userService;	
-	// 같은 타입의 빈이 두 개 존재하기 때문에 필드의 이름을 기준으로 주입될 빈이 결정된다.
-	// 자동 프록시 생성기에 의해 트랜잭션 부가기능이 제대로 적용되었는지 확인하는 것이 목적이다.
-	@Autowired UserService testUserService;
-    ....
-
-    @Test
-	public void upgradeAllOrNothing() throws Exception {
-				 
-		userDao.deleteAll();			  
-		for(User user : users) userDao.add(user);
-		
-		try {
-			this.testUserService.upgradeLevels();
-			fail("TestUserServiceException expected"); 
-		}
-		catch(TestUserServiceException e) { 
-		}
-		
-		checkLevelUpgraded(users.get(1), false);
-	}
-}
-```

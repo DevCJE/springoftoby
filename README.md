@@ -121,32 +121,3 @@ public class NameMatchClassMethodPointcut extends NameMatchMethodPointcut {
     }
 }
 ```
-이제 적용할 자동 프록시 생성기인 DefaultAdvisorAutoProxyCreator는 등록된 빈 중에서 Advisor 인터페이스를 구현한 것을 모두 찾는다. 그리고 생성되는 모든 빈에 대해 어드바이저의 포인트컷을 적용해보면서 프록시 적용 대상을 선정한다. 빈 클래스가 프록시 선정 대상이라면 프록시를 만들어 원래 빈 오브젝트와 바꿔치기한다. 원래 빈 오브젝트는 프록시 뒤에 연결돼서 프록시를 통해서만 접근 가능하게 바뀌는 것이다. 따라서 타깃 빈에 의존한다고 정의한 다른 빈들은 프록시 오브젝트를 대신 DI 받게 될 것이다.
-
-이제 자동 프록시 생성기를 스프링 빈으로 등록하면 된다. 이때에 id 어트리뷰트는 해당 빈이 참조되거나 조회될 필요가 없기에 넣지 않아도 무방하다. 이후 포인트컷을 등록한다.
-```
-<bean id ="transactionPointcut" class="springbook.user.service.NameMatchClassMethodPointcut">
-		<property name="mappedClassName" value="*ServiceImpl"/>
-		<property name="mappedName" value="upgrade*"/>
-</bean>
-```
-어드바이스인 transactionAdvice 빈의 설정은 수정할 게 없다. 어드바이저 또한 마찬가지이다. 하지만 어드바이저로서 사용되는 방법이 바뀌었다는 사실은 기억해두자. ProxyFactoryBean으로 등록한 빈에서 명시적으로 DI 하는 빈은 존재하지 않고 대신 어드바이저를 이용하는 자동 프록시 생성기인 DefaultAdvisorAutoProxyCreator에 의해 자동수집되고, 프록시 대상 선정 과정에 참여하며, 자동생성된 프록시에 다이내믹하게 DI 돼서 동작하는 어드바이저가 된다.
-
-자동 프록시 생성기를 사용함으로써 기존 테스트에 문제가 발생하는데 타깃을 테스트용 클래스로 바꿔치기 하는 방법을 사용했지만 이제는 자동 생성기에서 프록시만을 남겨줬을뿐 ProxyFactoryBean 같은게 남아 있지 않기에 더 이상 이 방법은 불가하다. 이제 자동 프록시 생성기라는 스프링 컨테이너에 종속적인 기법을 사용했기 때문에 예외상황을 위한 테스트 대상도 빈으로 등록해 줄 필요가 있다. 이제는 타깃을 코드에서 바꿔치기할 방법도 없을뿐더러, 자동 프록시 생성기의 적용이 되는지도 빈을 통해 확인할 필요가 있기 때문이다.
-```
-// 포인트컷의 클래스 필터에 선정되도록 이름 변경. 포인트컷은 *ServiceImpl 클래스들로 설정해놨다.
-	static class TestUserServiceImpl extends UserServiceImpl {
-		private String id = "madnite1"; // 테스트 픽스처의 값을 이제 가져올 수 없기에 고정
-
-		protected void upgradeLevel(User user) {
-			if (user.getId().equals(this.id)) throw new TestUserServiceException();
-			super.upgradeLevel(user);
-		}
-	}
-```
-이제 TestUserServiceImpl을 빈으로 등록하자.
-```
-<bean id="testUserService" 
-      class="springbook.user.service.UserServiceTest$TestUserServiceImpl" 
-      parent="userService" />
-```

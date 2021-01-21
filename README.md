@@ -331,3 +331,24 @@ public String view(@Pathvariable("id")int id){
 URL의 { }에는 패스 변수를 넣는다. 이 이름을 @PathVariable 애노테이션의 값으로 넣어서 메소드 파라미터에 부여해주면 된다. /user/view/10이라는 URL이라면, id 파라미터에 10이라는 값이 들어올 것이다. 파라미터의 타입은 URL의 내용이 적절히 변환될 수 있는 것을 사용해야 한다. 위와 같이 int 타입을 썻을 경우에는 반드시 해당 패스 변수 자리에 숫자 값이 들어 있어야 한다.  그렇지 않을 경우 HTTP 400 - Bad Request 가 발생한다.
 
 패스 변수는 "/member/{membercode}/order/{orderid}"처럼 여러 개를 선언할 수도 있다.
+
+
+
+현재 공부하고 있는 부분에서는 HTML 템플릿으로 mustache를 사용하고 있는데 이를 AWS에서 jar 파일로 배포할 경우 제대로 적용되지 않고 있는 경우가 생겼다.
+
+이럴 경우 jar 파일을 war 파일로 배포해야하며, 스프링부트에서 쓰는 내부톰캣을 외부톰캣으로 변경해줘야하는데 이 부분에 대해서 알아보자.
+
+먼저 pom.xml <packaging> 부분이 jar로 되어있는 것을 war로 바꾸어준다.
+
+이후 외부 톰캣 사용을 위해서 의존성 추가를 해준다. 
+
+<dependency>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-starter-tomcat</artifactId>
+	<scope>provided</scope>
+</dependency>
+다만 위와 같이 추가 할 경우 인텔리제이에 버그로 인해 로컬호스트로 진입하지 못하는 문제가 발생하므로 scope 부분을 제거해주던가. 주석처리한 후 작업해주어야 한다.
+
+이후 해당 AWS 서버에 외부 톰캣을 설치해주고
+해당 톰캣 webapps/ROOT 폴더에 war 파일을 배포함으로써
+외부 톰캣을 실행한다.

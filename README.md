@@ -352,3 +352,62 @@ URL의 { }에는 패스 변수를 넣는다. 이 이름을 @PathVariable 애노�
 이후 해당 AWS 서버에 외부 톰캣을 설치해주고
 해당 톰캣 webapps/ROOT 폴더에 war 파일을 배포함으로써
 외부 톰캣을 실행한다.
+
+@ModelAttribute
+
+
+
+HTTP Request에 포함된 파라미터를 지정한 클래스의 객체로 바인딩함. 
+
+
+
+@ModelAttribute의 'name'으로 정의한 Model객체를 다음 View에서 사용 가능
+
+
+
+또한 name을 정의하지 않으면 어노테이션을 준 객체의 클래스 이름명으로 정의된다.
+
+
+
+아래와 같이 패러미터 안에서 정의하는 것이 아니라 메소드에 바로 어노테이션을 정의하면 해당 컨트롤러가 시작시
+
+
+
+해당 name을 가진 모델로 객체가 자동 생성된다.
+
+@ModelAttribute("user") // 메소드에 ModelAttribute("name")을 통해 attribute를 정의하였다.
+public ModelUser userTest(){
+   ModelUser user = new ModelUser();
+   user.setUser_id("1234");
+   user.setUser_carnum("1004");
+   user.setUser_phone("1234-1234");
+   return user;
+}
+
+
+
+또한 @ModelAttribute로 설정한 모델이 이미 존재한다면 해당 모델을 불러들인 이후에 패러미터의 값을 바인딩하기 시작한다.
+
+
+
+@RequestMapping(value = "/register", method = RequestMethod.POST)
+public String register(Model model
+        , @ModelAttribute("user") ModelUser user) {
+    logger.info("register : POST");
+
+    if(user.getUser_carnum() == null){
+    user.setUser_lv(1);
+    }
+    else{
+    user.setUser_lv(2);
+    }
+    usersvr.insertUser(user);
+
+    return "home";
+}
+
+
+
+따라서 위를 응용하여서 유저의 정보를 수정할 때에 사용하여도 되겠으나 해당 부분을 더욱 간편하게 해주는 것이
+
+@SessionAttributes 이다.

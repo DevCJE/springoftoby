@@ -411,3 +411,4 @@ public String register(Model model
 따라서 위를 응용하여서 유저의 정보를 수정할 때에 사용하여도 되겠으나 해당 부분을 더욱 간편하게 해주는 것이
 
 @SessionAttributes 이다.
+p
